@@ -1484,6 +1484,33 @@ class TestJLink(unittest.TestCase):
         self.assertEqual(0, self.dll.JLINKARM_Connect.call_count)
         self.assertEqual(0, self.dll.JLINKARM_IsHalted.call_count)
         self.assertEqual(1, self.dll.JLINKARM_DEVICE_GetIndex.call_count)
+    
+    @mock.patch('time.sleep')
+    def test_jlink_connect_custom_devicelist(self, mock_sleep):
+        """Tests J-Link ``connect()`` with a custom devicelist.
+
+        Args:
+          self (TestJLink): the ``TestJLink`` instance
+          mock_sleep (Mock): mocked sleep function
+
+        Returns:
+          ``None``
+        """
+        self.dll.JLINKARM_ExecCommand.return_value = 0
+        self.dll.JLINKARM_Connect.return_value = 0
+        self.dll.JLINKARM_IsHalted.return_value = 0
+
+        self.jlink.num_supported_devices = mock.Mock()
+        self.jlink.num_supported_devices.return_value = 1
+        self.jlink.supported_device = mock.Mock()
+        self.jlink.supported_device.return_value = mock.Mock()
+        self.jlink.supported_device.return_value.name = 'device'
+
+        self.jlink.connect('device', speed=10, devicelist='JLinkDevices.xml')
+
+        self.assertEqual(2, self.dll.JLINKARM_ExecCommand.call_count)
+        self.assertEqual(1, self.dll.JLINKARM_Connect.call_count)
+        self.assertEqual(1, self.dll.JLINKARM_IsHalted.call_count)
 
     def test_jlink_error(self):
         """Tests the J-Link ``error`` property.

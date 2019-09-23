@@ -1089,7 +1089,7 @@ class JLink(object):
         return None
 
     @open_required
-    def connect(self, chip_name, speed='auto', verbose=False):
+    def connect(self, chip_name, speed='auto', verbose=False, devicelist=None):
         """Connects the J-Link to its target.
 
         Args:
@@ -1108,6 +1108,10 @@ class JLink(object):
 
         if verbose:
             self.exec_command('EnableRemarks = 1')
+
+        # if a path to a device-list xml was set, pass it to the dll via command string
+        if devicelist is not None:
+            self.exec_command('JLinkDevicesXMLPath {}'.format(devicelist))
 
         # Determine which device we are.  This is essential for using methods
         # like 'unlock' or 'lock'.
